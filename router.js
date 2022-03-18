@@ -27,7 +27,8 @@ function parse_params(param_string) {
  * @returns {[string, object]} the path and the parameters passed in
  */
 function parse_url(url) {
-  var path, params;
+  var path,
+    params = null;
   if (url.includes("?")) {
     path = url.split("?")[0];
     params = parse_params(url.split("?")[1]);
@@ -35,6 +36,24 @@ function parse_url(url) {
     path = url;
   }
   return [path, params];
+}
+
+/**
+ *
+ * @param {object} params
+ * @param {string} name the name of the param to check for
+ * @returns
+ */
+function param_exist(params, name) {
+  try {
+    return params[name] != null;
+  } catch (error) {
+    if (error instanceof TypeError || error instanceof ReferenceError) {
+      return false;
+    } else {
+      throw error;
+    }
+  }
 }
 
 /**
@@ -50,14 +69,14 @@ function route(path, method, params) {
     statusCode = 200;
     setHeader = ("Content-Type", "text/plain");
     end = "Hello World";
-  } else if (path == "/hi" && params.hi) {
-    statusCode = 200;
-    setHeader = ("Content-Type", "text/html");
-    end = `<b>Hello from the other side</b> <h2>${params.hi}</h2>`;
   } else if (path == "/hi") {
     statusCode = 200;
     setHeader = ("Content-Type", "text/html");
-    end = "<b>Hello from the other side</b>";
+    end = `${
+      param_exist(params, "hi")
+        ? "<h2>" + params.hi + "</h2>"
+        : "<b>Hello from the other side</b>"
+    }`;
   } else if (path == "/favicon.ico") {
   } else {
     statusCode = 200;
@@ -84,9 +103,10 @@ function router(req, res) {
     res.setHeader("Content-Type", "text/html");
     res.end(end);
   } catch (error) {
-    res.statusCode = 404;
+    res.statusCode = 403;
     res.setHeader("Content-Type", "text/html");
     res.end("<h1>ERROR HAS OCCURED</h1>");
+    console.error(error);
   }
 
   return res;
