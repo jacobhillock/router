@@ -30,6 +30,17 @@ function makeConfig() {
   );
   config.addRoute(
     new routerConfig.Route(
+      "/hi",
+      "GET",
+      ["name", "last"],
+      (params, route) => {
+        return `<h2>Hello ${params.name} ${params.last}</h2>`;
+      },
+      true
+    )
+  );
+  config.addRoute(
+    new routerConfig.Route(
       "/art",
       "GET",
       [],
